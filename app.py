@@ -1,38 +1,56 @@
 import streamlit as st
 import pandas as pd
 
-st.title("📊 Forex Trading Analytics Dashboard")
+st.set_page_config(page_title="Forex Trading Analytics Dashboard", layout="wide")
 
-# store trades for your session
-if "trades" not in st.session_state:
-    st.session_state.trades = []
+# ---- Sidebar ----
+st.sidebar.title("Navigation")
+menu = st.sidebar.radio("Go to", ["Dashboard", "Settings"])
 
-with st.form("trade_form"):
-    date = st.date_input("Date")
-    trader = st.text_input("Trader")
-    instrument = st.text_input("Instrument")
-    entry = st.number_input("Entry Price", format="%.4f")
-    sl = st.number_input("Stop Loss", format="%.4f")
-    target = st.number_input("Target Price", format="%.4f")
-    outcome = st.selectbox("Outcome", ["Win", "Loss", "Break-even"])
-    result = st.selectbox("Result", ["Profit", "Loss"])
-    submitted = st.form_submit_button("Add Trade")
-    if submitted:
-        st.session_state.trades.append({
-            "Date": date,
-            "Trader": trader,
-            "Instrument": instrument,
-            "Entry": entry,
-            "SL": sl,
-            "Target": target,
-            "Outcome": outcome,
-            "Result": result
-        })
+if menu == "Dashboard":
+    st.title("📊 Forex Trading Analytics Dashboard")
 
-df = pd.DataFrame(st.session_state.trades)
-st.write("### Trades Table")
-st.dataframe(df)
+    # ---- Top Cards ----
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Trades", "124", "↑ 8")
+    col2.metric("Win Rate", "65%", "↑ 2%")
+    col3.metric("Avg Profit", "$342", "↑ $15")
+    col4.metric("Loss Rate", "35%", "↓ 2%")
 
-if not df.empty:
-    st.write("### Profit vs Loss")
-    st.bar_chart(df["Result"].value_counts())
+    st.markdown("---")
+
+    # ---- Instruments with Hover Suggestions ----
+    st.subheader("💹 Instruments")
+    st.caption("Hover to see suggestions (example only)")
+    with st.expander("Instrument List & Suggestions"):
+        st.write(
+            """
+            - **EUR/USD** – click to trade  
+            - **GBP/USD** – suggested range strategy  
+            - **USD/JPY** – momentum signals active  
+            - **XAU/USD** – watch for breakout
+            """
+        )
+
+    # ---- Recent Trades Table ----
+    st.subheader("📒 Recent Trades")
+    trade_data = pd.DataFrame(
+        {
+            "Instrument": ["EUR/USD", "GBP/USD", "USD/JPY", "XAU/USD"],
+            "Direction": ["Buy", "Sell", "Buy", "Sell"],
+            "Entry Price": [1.0932, 1.2710, 149.50, 1928.3],
+            "Exit Price": [1.0970, 1.2650, 150.05, 1912.4],
+            "P/L ($)": [380, -420, 550, -260],
+        }
+    )
+    st.dataframe(trade_data, use_container_width=True)
+
+    # ---- Notes / Comments ----
+    st.subheader("📝 Trader Notes")
+    st.text_area("Write your observations here:")
+
+elif menu == "Settings":
+    st.title("⚙️ Settings")
+    st.write("Adjust user preferences here.")
+    st.slider("Refresh Rate (seconds)", 5, 60, 15)
+    st.color_picker("Theme Color", "#2c3e50")
